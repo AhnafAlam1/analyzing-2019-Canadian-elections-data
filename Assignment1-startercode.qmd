@@ -1,0 +1,194 @@
+---
+title: "ADD IN MEANINGFUL TITLE HERE"
+author: "Ahnaf Alam - 1006805076"
+subtitle: "STA304 - Winter 2025 - Assignment 1"
+format: pdf
+editor: visual
+---
+```{r}
+# Loading packages
+
+library(tidyverse)
+library(ggplot2)
+library (dplyr)
+library(knitr)
+```
+
+
+```{r, include = FALSE}
+# Fetching the data
+
+phone_data <- read_csv("ces_phone.csv")
+web_data <- read_csv("ces_web.csv")
+```
+
+# 1 Introduction
+
+In this section you will briefly describe your report. Explain the importance of the subsequent analysis and prepare the reader for what they will read in the subsequent sections. Explain the goal/topic of the survey/study and the TWO variables you selected of interest here. It might be helpful to explain why you chose your particular demographic variable and your particular outcome variable to investigate. Be sure to give rationale as to why investigating these variables is important to the study/inference. If you wish to **bold** or *italicize* your variable names, please do. Define the target, frame and sample population.
+
+# 2 Data
+
+Briefly introduce the data and key variables of interest. If you do any general data cleaning or data processing you should describe it (in a reproducible manner) here. It might be helpful to clearly define the variables of interest (i.e., the ones you will present in the subsequent sections) here, along with any data cleaning you did to these variables.
+
+```{r, include = FALSE}
+
+phone_data <- 
+  phone_data |>
+  mutate(
+    age_group = 
+      case_when(
+        age < 30 ~ "<30",
+        age < 50 ~ "30-49",
+        age < 65 ~ "50-64",
+        age < 85 ~ "65-84",
+        age < 100 ~ "85-99"
+      ),
+    age_group = factor(age_group, levels = c("<30", "30-49", "50-64", "65-84", "85-99"))
+  )
+
+web_data <- 
+  web_data |>
+  mutate(
+    age_group = 
+      case_when(
+        cps19_yob < 30 ~ "<30",
+        cps19_yob < 50 ~ "30-49",
+        cps19_yob < 65 ~ "50-64",
+        cps19_yob < 85 ~ "65-84",
+        cps19_yob < 100 ~ "85-99"
+      ),
+    age_group = factor(age_group, levels = c("<30", "30-49", "50-64", "65-84", "85-99"))
+  )
+
+combined_data <- bind_rows(
+  phone_data |> mutate(source = "Phone"),
+  web_data |> mutate(source = "Web")
+)
+
+```
+# 3 Demographic Variables
+
+Clearly state what your demographic variable is, and give a brief explanation of why you chose it. Create a visualization the same visualization of the distribution of the demographic variable across the two surveys (phone vs. web
+```{r, echo = FALSE}
+ggplot(combined_data, aes(x = age_group, fill = source)) +
+  geom_bar(position = "dodge") +
+  labs(
+    title = "Age Group Distribution: Web vs Phone",
+    x = "Age Group",
+    y = "Count",
+    fill = "Data Source"
+  ) +
+  theme_minimal()
+
+```
+
+
+```{r, include = FALSE}
+
+# Here you can clean the outcome variable data. 
+
+phone_data$voted_or_not <- ifelse(phone_data$q10 %in% c(1, 2, 5), 1, 0)
+
+web_data <- web_data |>
+  filter(!cps19_v_likely %in% c(5,6))
+
+web_data$voted_or_not <- ifelse(web_data$cps19_v_likely %in% c(1, 2, 7), 1, 0)
+ 
+phone_data_voted <- length(phone_data$voted_or_not[phone_data$voted_or_not == 1])/ length(phone_data$voted_or_not)
+
+web_data_voted <- length(web_data$voted_or_not[web_data$voted_or_not == 1])/ length(web_data$voted_or_not)
+```
+
+
+Include a clear description of each of the plot(s)/visualization(s). Be sure to highlight any key differences and/or similarities between the two plots and how this relays to the population(s). Comment on the effects of measuring the target, frame and sample population.
+
+# 4 Outcome of Interest
+
+Clearly state what your outcome variable is, and give a brief explanation of why you chose it. You will analyze this outcome in both datasets. For each survey (phone and web) the formula used for the confidence interval should also be presented and referenced \[2\]:
+
+$$\hat{p} \pm z \cdot SE$$
+
+```{r, include = FALSE}
+
+# Confidence interval for phone data
+
+s_e_1 <- sqrt((phone_data_voted* (1-phone_data_voted))/length(phone_data$voted_or_not))
+
+p_1 <- 0.975
+
+df_1 <- length(phone_data$voted_or_not) -1
+
+c_v_1 <- qnorm(p_1)
+
+m_e_1 <- c_v_1 * s_e_1
+
+# Upper Limit and lower limit
+
+upper_limit_1 <- p_1 + m_e_1
+
+lower_limit_1 <- p_1 - m_e_1
+
+# Confidence interval for web data
+
+s_e_2 <- sqrt((web_data_voted* (1-web_data_voted))/length(web_data$voted_or_not))
+
+p_2 <- 0.975
+
+df_2 <- length(web_data$voted_or_not) -1
+
+c_v_2 <- qnorm(p_2)
+
+m_e_2 <- c_v_2 * s_e_2
+
+# Upper Limit and lower limit
+
+upper_limit_2 <- p_2 + m_e_2
+
+lower_limit_2 <- p_2 - m_e_2
+
+# Creating a data frame
+
+survey_type <- c("Phone Survey", "Web Survey")
+proportions <- c(phone_data_voted, web_data_voted)
+lower_bound <- c(lower_limit_1, lower_limit_2)
+upperbound <- c(upper_limit_1, upper_limit_2)
+
+
+c_i <- paste("(", format(lower_bound, nsmall = 3), ", ", format(upperbound, nsmall = 3), ")", sep = "")
+
+table <- data.frame(
+  "Outcome Variable" = survey_type,
+  "Proportions" = proportions,
+  "table95% CI of Outcome Variable" = c_i
+)
+
+print(table)
+
+```
+
+In Table 1 I present both confidence intervals of... Compare the confidence intervals of the same outcome of the two surveys. Be sure to highlight any key differences and/or similarities between the two CIs and how this relays to the populations at hand (i.e., about the Canadian electorate's behavior or opinions).
+
+|   | Proportion of Outcome Variable | 95% Confidence Interval of Outcome Variable |
+|----------------|-----------------------|---------------------------------|
+| Phone Survey | 0.34 | (lower bound, upper bound) |
+| Web Survey | 0.25 | (lower bound, upper bound) |
+
+: The proportions and 95% confidence intervals of outcome variable of interest calculated for both the Canadian Election Study 2019 phone and web survey data.
+
+# 5 Comparative Analysis
+
+Here you will write a few paragraphs with a general reflection commenting on: demographic differences, biases/errors, and implications for analysis.
+
+# 6 Generative AI Statement
+
+Here is where you can explain your usage of Generative AI tool(s). Be sure to reference it.
+
+Alternatively, if you did not use Generative AI, please include a brief statement outlining your workflow for completing this assignment.
+
+# 7 Bibliography
+
+1.  Grolemund, G. (2014, July 16) *Introduction to R Markdown*. RStudio. <https://rmarkdown.rstudio.com/articles_intro.html>. (Last Accessed: April 4, 1991)
+
+2.  Dekking, F. M., et al. (2005) *A Modern Introduction to Probability and Statistics: Understanding why and how.* Springer Science & Business Media.
+
+3.  Allaire, J.J., et. el. *References: Introduction to R Markdown*. RStudio. <https://rmarkdown.rstudio.com/docs/>. (Last Accessed: April 4, 1991)
