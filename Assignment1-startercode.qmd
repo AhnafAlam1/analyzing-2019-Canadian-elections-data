@@ -4,18 +4,30 @@ author: "Ahnaf Alam - 1006805076"
 subtitle: "STA304 - Winter 2025 - Assignment 1"
 format: pdf
 editor: visual
+date: today
+date-format: long
+bibliography: ref.bib
 ---
 ```{r}
+#| include: false
+#| warning: false
+#| message: false
+
 # Loading packages
 
 library(tidyverse)
 library(ggplot2)
 library (dplyr)
 library(knitr)
+library(kableExtra)
 ```
 
 
-```{r, include = FALSE}
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
 # Fetching the data
 
 phone_data <- read_csv("ces_phone.csv")
@@ -24,13 +36,24 @@ web_data <- read_csv("ces_web.csv")
 
 # 1 Introduction
 
-In this section you will briefly describe your report. Explain the importance of the subsequent analysis and prepare the reader for what they will read in the subsequent sections. Explain the goal/topic of the survey/study and the TWO variables you selected of interest here. It might be helpful to explain why you chose your particular demographic variable and your particular outcome variable to investigate. Be sure to give rationale as to why investigating these variables is important to the study/inference. If you wish to **bold** or *italicize* your variable names, please do. Define the target, frame and sample population.
+Prior to elections, polling is a common way to understand how the electorate if feeling leading up to an election. It allows to estimate and predict the results before the election date. Elections surveys revolve around question of how people are feeling about each of the candidates/parties and their voting intentions in the upcoming election. The most common way collecting such data is through either phone questionnaire or online surveys (web). The target population for pollsters is the entire Canadian electorate who are residing in Canada and is eligible to vote. The frame population a caller list for web or phone which contains phone number for everyone. The sample population are those who chose to do the survey, either through phone or web and therefore, is in the data. The phone purpose of this exercise to infer how Canadians may vote in the upcoming election.
+
+The current surveys collects data of seven variables across Canada. It asks a persons their gender, and age, along with their current province, highest level of education attainment, interest in the upcoming election, likelihood of voting and who they are most likely to vote for. I focus on two variable in this report: age and likelihood of voting. Historically, there has been discrepancy between voting intention and the actual voter turnout. For example, in the 2015 elections, the overall voter turnout was 66.1% despite voting intention being high. While data on actual voter turnout can only be found after the election, this report want to visualize the electorate voting intention and compare that with actual turnour rate to see if there any discrepancy between the two.
+
+The following report will comment 
 
 # 2 Data
 
-Briefly introduce the data and key variables of interest. If you do any general data cleaning or data processing you should describe it (in a reproducible manner) here. It might be helpful to clearly define the variables of interest (i.e., the ones you will present in the subsequent sections) here, along with any data cleaning you did to these variables.
+The data comes from  [2019 Canadian Election Study](http://www.ces-eec.ca/2019-canadian-election-study/). The surveys were either conducted through phone or through an online survey. Both versions of the surveys were comparable and the questions focused on election-related issues, like vote intention, political engagement, and partisanship, among other variables. The surveys also contained demography question, pertaning to respondents age, province, education attainment, and gender. 
 
-```{r, include = FALSE}
+The following report focuses on two variables: respondents' age and voter turnout. Particularly, we are interested in knowing whether the distribution of respondents differs between the two sources, phone or web. We do this to understand whether the patterns for those 
+
+In the phone survey, the variable name for age category was `age` and certainty over voting was called `q10`. The `age` variable was numerical number, corresponding to respondents age. The question likelihood of voting took values 1 though 5, representing categories "Certain", "Likely, Unlikely", "Certain not to vote", and "Already voted in advanced polling", respectively. Similarly, for the web data, `cps19_yob` represented respondants age and likelyhood of voting variable is called `cps19_v_likely`. It takes values from from 1 through 7, representing categories, "Certain", "Likely Unlikely", "Certain to not vote", "I am not eligible to vote", "Don’t know/prefer not to answer", and "I voted in an advance poll". For both phone and web data, we create variable `age_group`, which divides the repsondents into different age group, and then combine phone data and web data together to create one dataframe, which we use to visualize the demography variable. To estimate the likelihood of voting, we create a  binary variable `voted_or_not`. We grouped respondents together who answered "Certain", "Likely" and "I already voted in an advanced poll" in the survey. The variable took 1, indicating these respondents have either voted in the election or is more likely to vote. Similarly, we grouped respondents together who answered "Unlikely" and "Certain not to vote" together, assigning 0 to the variable. Additionally, we got rid of observations who answered "I am not eligible to vote" and "Don’t know/prefer not to answer" as their answer is inpplicable to the question being asked. The complete data and code can be found [here](https://github.com/AhnafAlam1/analyzing-2019-Canadian-elections-data).
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
 
 phone_data <- 
   phone_data |>
@@ -68,8 +91,19 @@ combined_data <- bind_rows(
 ```
 # 3 Demographic Variables
 
-Clearly state what your demographic variable is, and give a brief explanation of why you chose it. Create a visualization the same visualization of the distribution of the demographic variable across the two surveys (phone vs. web
-```{r, echo = FALSE}
+@tbl-1 shows number of respondents between for each of the age group, separated by survey method. The graph highlights few key points. Firstly, for both phone data and web data, most of the respondents are between the ages of 30 and 49.In the case that it signals that that respondents at this age group ae more likely to respond to survey, demographers could look for databases that separates respondents by age group, and create a frame population using only those in that age group. Sampling from this database will increase the popability of survey response and with a large enough sample population, the resulting analysis will allow deeper understanding of how the true population of this age group may vote in the election.
+
+Similarly, we see that number of respondents is lower for 18-30 age group. This could imply coupld things. Firstly, it could be that people in that age group are just less likely to respond, irrespective whether they are reached through phone or web. Moreover, frame population is not represetive of the true population as database they are using to survey people, includes inadequete amount of data on that age group, which means sapling population is also lower than other age demography and any inference related to that age group must be evaluated further as the current sample data may not be good presentation of the true population. 
+
+
+```{r}
+#| label: tbl-1
+#| tbl-cap: "A comparison of the number of people interviewed by phone or web across different age groups"
+#| warning: false
+#| message: false
+#| echo: false
+
+
 ggplot(combined_data, aes(x = age_group, fill = source)) +
   geom_bar(position = "dodge") +
   labs(
@@ -83,9 +117,11 @@ ggplot(combined_data, aes(x = age_group, fill = source)) +
 ```
 
 
-```{r, include = FALSE}
+```{r}
+#| include: false
+#| warning: false
+#| message: false
 
-# Here you can clean the outcome variable data. 
 
 phone_data$voted_or_not <- ifelse(phone_data$q10 %in% c(1, 2, 5), 1, 0)
 
@@ -97,10 +133,10 @@ web_data$voted_or_not <- ifelse(web_data$cps19_v_likely %in% c(1, 2, 7), 1, 0)
 phone_data_voted <- length(phone_data$voted_or_not[phone_data$voted_or_not == 1])/ length(phone_data$voted_or_not)
 
 web_data_voted <- length(web_data$voted_or_not[web_data$voted_or_not == 1])/ length(web_data$voted_or_not)
+
+phone_data_voted <- round(phone_data_voted, 3)
 ```
 
-
-Include a clear description of each of the plot(s)/visualization(s). Be sure to highlight any key differences and/or similarities between the two plots and how this relays to the population(s). Comment on the effects of measuring the target, frame and sample population.
 
 # 4 Outcome of Interest
 
@@ -108,7 +144,11 @@ Clearly state what your outcome variable is, and give a brief explanation of why
 
 $$\hat{p} \pm z \cdot SE$$
 
-```{r, include = FALSE}
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
 
 # Confidence interval for phone data
 
@@ -124,9 +164,9 @@ m_e_1 <- c_v_1 * s_e_1
 
 # Upper Limit and lower limit
 
-upper_limit_1 <- p_1 + m_e_1
+upper_limit_1 <- phone_data_voted + m_e_1
 
-lower_limit_1 <- p_1 - m_e_1
+lower_limit_1 <- phone_data_voted - m_e_1
 
 # Confidence interval for web data
 
@@ -142,38 +182,45 @@ m_e_2 <- c_v_2 * s_e_2
 
 # Upper Limit and lower limit
 
-upper_limit_2 <- p_2 + m_e_2
+upper_limit_2 <- web_data_voted + m_e_2
 
-lower_limit_2 <- p_2 - m_e_2
+lower_limit_2 <- web_data_voted - m_e_2
 
 # Creating a data frame
 
 survey_type <- c("Phone Survey", "Web Survey")
-proportions <- c(phone_data_voted, web_data_voted)
+proportions <- round(c(phone_data_voted, web_data_voted),3)
 lower_bound <- c(lower_limit_1, lower_limit_2)
 upperbound <- c(upper_limit_1, upper_limit_2)
 
-
-c_i <- paste("(", format(lower_bound, nsmall = 3), ", ", format(upperbound, nsmall = 3), ")", sep = "")
+c_i <- sprintf("(%0.3f, %0.3f)", lower_bound, upperbound)
 
 table <- data.frame(
   "Outcome Variable" = survey_type,
   "Proportions" = proportions,
-  "table95% CI of Outcome Variable" = c_i
+  "95% Confidence" = c_i
 )
 
-print(table)
+
 
 ```
 
-In Table 1 I present both confidence intervals of... Compare the confidence intervals of the same outcome of the two surveys. Be sure to highlight any key differences and/or similarities between the two CIs and how this relays to the populations at hand (i.e., about the Canadian electorate's behavior or opinions).
 
-|   | Proportion of Outcome Variable | 95% Confidence Interval of Outcome Variable |
-|----------------|-----------------------|---------------------------------|
-| Phone Survey | 0.34 | (lower bound, upper bound) |
-| Web Survey | 0.25 | (lower bound, upper bound) |
 
-: The proportions and 95% confidence intervals of outcome variable of interest calculated for both the Canadian Election Study 2019 phone and web survey data.
+```{r}
+#| label: tbl-2
+#| tbl-cap: "95% Confidence Interval showing who likely have voted or is certain to vote in the 2019 elections"
+#| warning: false
+#| message: false
+#| echo: false
+
+
+colnames(table) <- c("Outcome Variable" , "Proportions", "95% Confidence Interval")
+table |>
+  kable() |>
+  kable_styling(position = "center")
+```
+
 
 # 5 Comparative Analysis
 
@@ -187,8 +234,4 @@ Alternatively, if you did not use Generative AI, please include a brief statemen
 
 # 7 Bibliography
 
-1.  Grolemund, G. (2014, July 16) *Introduction to R Markdown*. RStudio. <https://rmarkdown.rstudio.com/articles_intro.html>. (Last Accessed: April 4, 1991)
 
-2.  Dekking, F. M., et al. (2005) *A Modern Introduction to Probability and Statistics: Understanding why and how.* Springer Science & Business Media.
-
-3.  Allaire, J.J., et. el. *References: Introduction to R Markdown*. RStudio. <https://rmarkdown.rstudio.com/docs/>. (Last Accessed: April 4, 1991)
