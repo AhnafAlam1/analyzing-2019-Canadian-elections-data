@@ -1,12 +1,15 @@
 ---
-title: "ADD IN MEANINGFUL TITLE HERE"
+title: "The age-old debate: analyzing the underepresentation of younger voter in surveys"
 author: "Ahnaf Alam - 1006805076"
 subtitle: "STA304 - Winter 2025 - Assignment 1"
-format: pdf
+format:
+  pdf:
+    number-sections: true
 editor: visual
 date: today
 date-format: long
 bibliography: ref.bib
+thanks: For replication, the data and code can be found at https://github.com/AhnafAlam1/analyzing-2019-Canadian-elections-data
 ---
 ```{r}
 #| include: false
@@ -34,82 +37,88 @@ phone_data <- read_csv("ces_phone.csv")
 web_data <- read_csv("ces_web.csv")
 ```
 
-# 1 Introduction
+# Introduction
 
-Prior to elections, polling is a common way to understand how the electorate if feeling leading up to an election. It allows to estimate and predict the results before the election date. Elections surveys revolve around question of how people are feeling about each of the candidates/parties and their voting intentions in the upcoming election. The most common way collecting such data is through either phone questionnaire or online surveys (web). The target population for pollsters is the entire Canadian electorate who are residing in Canada and is eligible to vote. The frame population a caller list for web or phone which contains phone number for everyone. The sample population are those who chose to do the survey, either through phone or web and therefore, is in the data. The phone purpose of this exercise to infer how Canadians may vote in the upcoming election.
+Election surveys are essential tools for understanding public opinion leading up to an election. They provide valuable insights into voter preferences, opinions on candidates, and key issues, allowing surveyors to estimate and predict election outcomes before voting takes place. Surveys are commonly conducted via phone or online questionnaires. In this report, I will compare and analyze similarities between phone and web survey results, using the 2019 Canadian election data.
 
-The current surveys collects data of seven variables across Canada. It asks a persons their gender, and age, along with their current province, highest level of education attainment, interest in the upcoming election, likelihood of voting and who they are most likely to vote for. I focus on two variable in this report: age and likelihood of voting. Historically, there has been discrepancy between voting intention and the actual voter turnout. For example, in the 2015 elections, the overall voter turnout was 66.1% despite voting intention being high. While data on actual voter turnout can only be found after the election, this report want to visualize the electorate voting intention and compare that with actual turnour rate to see if there any discrepancy between the two.
+In this report, I focus on two variables: age and likelihood of voting. Examining age allows me to compare the number of respondents across different age groups in phone and web survey data. This helps identify discrepancies in responses by age group between the two methods. Older individuals are more likely to use landlines, while younger people typically have better access to the internet. Any such discrepancies could suggest that one survey method is more effective for specific demographics, enabling better sampling strategies based on age. I also analyze the proportion of respondents who say they are likely to vote. In Canada, voter turnout is historically low, with only 66% participation in the 2015 general election. I aim to determine whether advanced surveys can predict voter turnout. By comparing turnout rates from phone and web surveys with actual turnout, I assess which method aligns more closely with real-world data and explore potential reasons for any differences. 
 
-The following report will comment 
+In @sec-dem, I discuss the data source and outline the cleaning process to prepare it for analysis. In @sec-dem, I present a bar plot comparing the number of respondents in phone and web survey data across different age groups, followed by a discussion of why some age groups have fewer respondents. Next, @sec-oi examines potential reasons for the high proportion of respondents reporting a likelihood to vote. In @sec-ca, I address response bias in phone data and coverage bias in web data. The report concludes with a discussion on the role of generative AI in this analysis.
 
-# 2 Data
+#  Data {#sec-data}
 
-The data comes from  [2019 Canadian Election Study](http://www.ces-eec.ca/2019-canadian-election-study/). The surveys were either conducted through phone or through an online survey. Both versions of the surveys were comparable and the questions focused on election-related issues, like vote intention, political engagement, and partisanship, among other variables. The surveys also contained demography question, pertaning to respondents age, province, education attainment, and gender. 
+The report uses phone data [@Stephenson_2020_phone] and web data [@Stephenson_2020_online] from the [2019 Canadian Federal Election](http://www.ces-eec.ca/2019-canadian-election-study/). Despite different collection methods, both surveys included comparable questions on election-related topics such as vote intention, political engagement, and partisanship, as well as demographic questions on age, province, education level, and gender.
 
-The following report focuses on two variables: respondents' age and voter turnout. Particularly, we are interested in knowing whether the distribution of respondents differs between the two sources, phone or web. We do this to understand whether the patterns for those 
+This analysis focuses on two variables: respondents' age and likely voter turnout. For age, I examine whether there are differences in age-group representation between phone and web surveys. Identifying such discrepancies can help surveyors address underrepresentation of certain demographics in future data collection. For likely voter turnout, I analyze whether survey results align with historical turnout data. Discrepancies between reported and actual turnout can provide policymakers with insights into why some individuals who express intent to vote ultimately do not, enabling the design of policies to address this gap.
 
-In the phone survey, the variable name for age category was `age` and certainty over voting was called `q10`. The `age` variable was numerical number, corresponding to respondents age. The question likelihood of voting took values 1 though 5, representing categories "Certain", "Likely, Unlikely", "Certain not to vote", and "Already voted in advanced polling", respectively. Similarly, for the web data, `cps19_yob` represented respondants age and likelyhood of voting variable is called `cps19_v_likely`. It takes values from from 1 through 7, representing categories, "Certain", "Likely Unlikely", "Certain to not vote", "I am not eligible to vote", "Don’t know/prefer not to answer", and "I voted in an advance poll". For both phone and web data, we create variable `age_group`, which divides the repsondents into different age group, and then combine phone data and web data together to create one dataframe, which we use to visualize the demography variable. To estimate the likelihood of voting, we create a  binary variable `voted_or_not`. We grouped respondents together who answered "Certain", "Likely" and "I already voted in an advanced poll" in the survey. The variable took 1, indicating these respondents have either voted in the election or is more likely to vote. Similarly, we grouped respondents together who answered "Unlikely" and "Certain not to vote" together, assigning 0 to the variable. Additionally, we got rid of observations who answered "I am not eligible to vote" and "Don’t know/prefer not to answer" as their answer is inpplicable to the question being asked. The complete data and code can be found [here](https://github.com/AhnafAlam1/analyzing-2019-Canadian-elections-data).
+In the phone survey, the variable `age` represented respondents' age, and `q10` represented likelihood of voting, with values ranging from 1 to 5 ("Certain" to "Already voted in advance"). In the web survey, `cps19_yob` represented age, while `cps19_v_likely` measured likelihood of voting, with values from 1 to 7 ("Certain" to "I voted in an advance poll"). I created an `age_group` variable for both datasets, categorizing respondents into 18-34, 35-54, and 55+ age groups. Further, phone and web data were merged into a single dataset to analyze trends. To estimate voting likelihood, a binary variable was created, named `voted_or_not`. Respondents who selected "Certain," "Likely," or "I already voted in an advanced poll" were grouped as 1 (likely to vote). Those who answered "Unlikely" or "Certain not to vote" were grouped as 0 (unlikely to vote). Responses like "I am not eligible to vote" and "Don’t know/prefer not to answer" were excluded as irrelevant.The complete data and code can be found [here](https://github.com/AhnafAlam1/analyzing-2019-Canadian-elections-data).
 
 ```{r}
 #| include: false
 #| warning: false
 #| message: false
 
+
 phone_data <- 
   phone_data |>
   mutate(
     age_group = 
       case_when(
-        age < 30 ~ "<30",
-        age < 50 ~ "30-49",
-        age < 65 ~ "50-64",
-        age < 85 ~ "65-84",
-        age < 100 ~ "85-99"
+        age < 35 ~ "18-34",
+        age < 55 ~ "35-54",
+        age < 100 ~ "55+"
       ),
-    age_group = factor(age_group, levels = c("<30", "30-49", "50-64", "65-84", "85-99"))
+    age_group = factor(age_group, levels = c("18-34", "35-54", "55+"))
   )
+
 
 web_data <- 
   web_data |>
   mutate(
     age_group = 
       case_when(
-        cps19_yob < 30 ~ "<30",
-        cps19_yob < 50 ~ "30-49",
-        cps19_yob < 65 ~ "50-64",
-        cps19_yob < 85 ~ "65-84",
-        cps19_yob < 100 ~ "85-99"
+        cps19_yob < 35 ~ "18-34",
+        cps19_yob < 55 ~ "35-54",
+        cps19_yob < 100 ~ "55+"
       ),
-    age_group = factor(age_group, levels = c("<30", "30-49", "50-64", "65-84", "85-99"))
+    age_group = factor(age_group, levels = c("18-34", "35-54", "55+"))
   )
+
 
 combined_data <- bind_rows(
   phone_data |> mutate(source = "Phone"),
   web_data |> mutate(source = "Web")
-)
+) |>
+  group_by(source, age_group) |>
+  summarise(count = n(), .groups = "drop") |>
+  group_by(source) |>
+  mutate(percentage = count / sum(count) * 100) |>
+  filter(!is.na(age_group))
 
 ```
-# 3 Demographic Variables
+# Demographic Variables {#sec-dem}
 
-@tbl-1 shows number of respondents between for each of the age group, separated by survey method. The graph highlights few key points. Firstly, for both phone data and web data, most of the respondents are between the ages of 30 and 49.In the case that it signals that that respondents at this age group ae more likely to respond to survey, demographers could look for databases that separates respondents by age group, and create a frame population using only those in that age group. Sampling from this database will increase the popability of survey response and with a large enough sample population, the resulting analysis will allow deeper understanding of how the true population of this age group may vote in the election.
+@fig-1 shows the number of respondents in each age group, separated by survey method. Approximately 45% of respondents in both the phone and web surveys were aged 55 or older, while around 20% were younger individuals. Both surveys effectively captured older populations but struggled to reach younger respondents.
 
-Similarly, we see that number of respondents is lower for 18-30 age group. This could imply coupld things. Firstly, it could be that people in that age group are just less likely to respond, irrespective whether they are reached through phone or web. Moreover, frame population is not represetive of the true population as database they are using to survey people, includes inadequete amount of data on that age group, which means sapling population is also lower than other age demography and any inference related to that age group must be evaluated further as the current sample data may not be good presentation of the true population. 
+In the phone survey, the target population included all adult Canadians with access to a landline or cell phone. Constructing the sampling frame was challenging, so @Stephenson_2020_phone used external survey agencies. Advanis provided wireless phone numbers, and ASDE provided landline numbers. Only in-service numbers were included in the frame. Wireless numbers were randomly selected, while for landline samples, if multiple eligible respondents were present, the individual with the next birthday was chosen to ensure randomization.
+
+For the web survey, Qualtrics, an external platform, created the sampling frame. Respondents had previously signed up for surveys, and Qualtrics drew from multiple panels to match the Canadian population's distribution. The target population included adult Canadians, including permanent residents, with internet access. Participants were randomly selected from this frame.
 
 
 ```{r}
-#| label: tbl-1
-#| tbl-cap: "A comparison of the number of people interviewed by phone or web across different age groups"
+#| label: fig-1
+#| fig-cap: "A comparison of the number of people interviewed by phone or web across different age groups"
 #| warning: false
 #| message: false
 #| echo: false
 
 
-ggplot(combined_data, aes(x = age_group, fill = source)) +
-  geom_bar(position = "dodge") +
+ggplot(combined_data, aes(x = age_group, y = percentage, fill = source)) +
+  geom_bar(stat = "identity", position = "dodge") +
   labs(
-    title = "Age Group Distribution: Web vs Phone",
+    title = "Age Group Distribution by Percentage: Web vs Phone",
     x = "Age Group",
-    y = "Count",
+    y = "Percentage",
     fill = "Data Source"
   ) +
   theme_minimal()
@@ -138,11 +147,16 @@ phone_data_voted <- round(phone_data_voted, 3)
 ```
 
 
-# 4 Outcome of Interest
+#  Outcome of Interest {#sec-oi}
 
-Clearly state what your outcome variable is, and give a brief explanation of why you chose it. You will analyze this outcome in both datasets. For each survey (phone and web) the formula used for the confidence interval should also be presented and referenced \[2\]:
+The outcome of interest is the likelihood of voting in the upcoming election. As outlined in @sec-data, I created a binary variable for both phone and web datasets, and then calculated the proportion of respondents who reported that they were likely to vote or had already voted. For phone data, 95.1% of respondents reported already voted or strong intention to vote in advanced polling, compared to 91.3% for web data. Additionally, we calculated the 95% confidence interval (CI) for the probable turnout rates in both datasets using the formula: $$\hat{p} \pm z \cdot SE $$ where $\hat{p}$ is the proportion, $z$ is the z-score for a 95% CI, and $SE$ is the standard error. The computed 95% confidence intervals are provided in @tbl-2. 
 
-$$\hat{p} \pm z \cdot SE$$
+Both datasets show a high proportion of respondents who reported either voting or intending to vote, with estimates in the 90th percentile. However, this contrasts with the actual voter turnout rate of 68.3% in the 2015 Canadian election [@Canada]. This discrepancy suggests a gap between self-reported voting intentions and actual voting behavior.
+
+One explanation for this gap is that individuals more likely to vote may also be more likely to participate in surveys, whether conducted via phone or web. This introduces systematic differences between survey respondents and non-respondents, which could bias analysis if not accounted for. Another potential reason is that external barriers prevent people from voting despite their intentions. For example, access to voting for individuals with disabilities remains inadequate in Canada [@salvino2024case]. Older adults, who are more likely to have disabilities, form a significant portion of the population. While they may intend to vote, insufficient accommodations in polling station may deter them. This highlights the need for policy interventions to address these barriers and enhance voter turnout, ensuring that everyone can exercise their right to vote.  
+
+
+
 
 ```{r}
 #| include: false
@@ -218,20 +232,23 @@ table <- data.frame(
 colnames(table) <- c("Outcome Variable" , "Proportions", "95% Confidence Interval")
 table |>
   kable() |>
-  kable_styling(position = "center")
+  kable_styling(latex_options = c("striped"), font_size = 12, position = "center")
 ```
 
 
-# 5 Comparative Analysis
+#  Comparative Analysis {#sec-ca}
 
-Here you will write a few paragraphs with a general reflection commenting on: demographic differences, biases/errors, and implications for analysis.
+@Stephenson_2020_online targeted a sample consisting of 28% respondents aged 18-34, 33% aged 35-54, and 39% aged 55 and older. However, as shown in @tbl-1, only 18% of web survey respondents were aged 18-34, while 45% were aged 55 and older. These trend in underrepresentation of young people is also present in the phone survey data, biasing the data toward older respondents. This bias affects the large proportion observed in @tbl-2, as older demographics historically exhibit higher voter turnout. In the 2015 Canadian federal election, turnout for 18-34-year-olds was approximately 57%, compared to 75% for individuals aged 55 and older (@Canada). Thus, the sample composition skews the proportion of likely voters toward the 90th percentile, while historical data suggests an overall turnout closer to 66%.
 
-# 6 Generative AI Statement
+Creating a dataset more representative of young people is challenging. Young individuals are harder to reach for surveyors, and many choose not to participate due to political apathy. This detachment from the political process stems from growing skepticism about government efficacy and a sense of exclusion from decision-making process that impacts their future [@berthin2023youthdemocracy]. This means that younger people are less likely to respond to election surveys. Additionally, young people are less likely to respond to phone surveys, and while online polls are more accessible, competing priorities such as work and social activities reduce participation.
 
-Here is where you can explain your usage of Generative AI tool(s). Be sure to reference it.
+Phone data also suffers from response bias, as individuals who avoid or refuse surveys may differ systematically from participants. This nonresponse leads to a sample that does not fully represent the adult Canadian population. On the other hand, web surveys are subject to coverage bias. Reliable internet access is limited in rural areas, and older populations and low-income groups are less likely to have internet access. These biases result in underrepresentation of certain population segments, affecting the generalizability of findings.
 
-Alternatively, if you did not use Generative AI, please include a brief statement outlining your workflow for completing this assignment.
 
-# 7 Bibliography
+#  Generative AI Statement
+
+Large Language Models (LLMs) were used for two purposes in this report. First, ChatGPT was employed to generate code for @fig-1. Specifically, the LLM was used to transform the graph into a percentage format. I adjusted all labels and column names to align with previous code chunks. Second, while all the text in this report is my own, I used ChatGPT to identify and correct grammatical, spelling, and punctuation errors. It served effectively as a proofreader. 
+
+#  Bibliography
 
 
